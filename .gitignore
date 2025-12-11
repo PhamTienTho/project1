@@ -1,0 +1,21 @@
+node_modules/
+.dist/
+dist/
+.vite/
+
+# Environment variables
+.env*
+
+# Logs
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# Editor/OS files
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Coverage / test outputs
+coverage/
