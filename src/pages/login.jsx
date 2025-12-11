@@ -22,13 +22,13 @@ const LoginPage = () => {
             const idToken = credentialResponse.credential;
 
             // Gửi id_token và clientId lên backend để verify và tạo session
-            // const res = await loginWithGoogle(idToken);
+            const response = await loginWithGoogle(idToken);
 
             // console.log('Backend response:', response.data);
             
             // Lưu thông tin user vào localStorage
-            // localStorage.setItem('user', JSON.stringify(response.data.user));
-            // localStorage.setItem('access_token', response.data.access_token);
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+            localStorage.setItem('access_token', response.data.access_token);
             
             // message.success('Đăng nhập thành công!');
             navigate('/');
