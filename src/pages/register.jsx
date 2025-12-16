@@ -1,4 +1,4 @@
-import { ArrowRightOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
+import { ArrowRightOutlined, LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Col, Form, Input, message, notification, Row } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUserAPI } from "../services/api.service";
@@ -9,15 +9,21 @@ const RegisterPage = () => {
     const navigate = useNavigate();
 
     const handleRegister = async (value) => {
-        const res = await registerUserAPI(value.email, value.password);
-        if(res.data) {
-            message.success("Đăng ký tài khoản thành công");
-            navigate('/login');
-        }
-        else {
+        try {
+            const res = await registerUserAPI(value.username, value.email, value.password);
+            if (res?.data) {
+                message.success("Đăng ký tài khoản thành công");
+                navigate('/login');
+            } else {
+                notification.error({
+                    message: "Đăng ký tài khoản thất bại",
+                    description: res?.message || 'Vui lòng kiểm tra lại thông tin đăng ký'
+                })
+            }
+        } catch (error) {
             notification.error({
                 message: "Đăng ký tài khoản thất bại",
-                description: JSON.stringify(res.message)
+                description: 'Có lỗi khi kết nối. Vui lòng thử lại sau.'
             })
         }
     }
@@ -28,22 +34,29 @@ const RegisterPage = () => {
                 <fieldset style={{
                     padding: "15px",
                     margin: "5px",
-                    boder: "1px solic #ccc",
+                    border: "1px solid #ccc",
                     borderRadius: "5px"
                 }}>
                     <legend>Đăng ký tài khoản</legend>
                     <Form
-                        name="login"
+                        name="register"
                         onFinish={handleRegister}
                         style={{ margin: "30px"}}
                         form={form}
                     >
 
                         <Form.Item
+                            name="username"
+                            rules={[{ required: true, message: 'Please input your username!' }]}
+                        >
+                            <Input prefix={<UserOutlined />} placeholder="Username" />
+                        </Form.Item>
+
+                        <Form.Item
                             name="email"
                             rules={[{ required: true, message: 'Please input your email!' }]}
                         >
-                            <Input prefix={<UserOutlined />} placeholder="Email" />
+                            <Input prefix={<MailOutlined />} placeholder="Email" />
                         </Form.Item>
 
 
@@ -51,7 +64,25 @@ const RegisterPage = () => {
                             name="password"
                             rules={[{ required: true, message: 'Please input your password!' }]}
                         >
-                            <Input.Password prefix={<LockOutlined />} placeholder="Password"
+                            <Input.Password prefix={<LockOutlined />} placeholder="Password" />
+                        </Form.Item>
+
+                        <Form.Item
+                            name="confirm_password"
+                            dependencies={['password']}
+                            rules={[
+                                { required: true, message: 'Please confirm your password!' },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (!value || getFieldValue('password') === value) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(new Error('Mật khẩu không khớp!'));
+                                    },
+                                }),
+                            ]}
+                        >
+                            <Input.Password prefix={<LockOutlined />} placeholder="Confirm Password"
                                 onKeyDown={(event) => {
                                     if (event.key === 'Enter') {
                                         form.submit();
@@ -59,7 +90,6 @@ const RegisterPage = () => {
                                 }}
                             />
                         </Form.Item>
-
 
                         <div style={{ display: "flex", justifyContent: "space-between" }}>
                             <Button type="primary"

@@ -1,27 +1,38 @@
 import { ArrowRightOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Col, Divider, Form, Input, Row, message } from "antd";
+import { Button, Col, Divider, Form, Input, Row, message, notification } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from '@react-oauth/google';
-import axios from 'axios';
-import { API_BASE_URL } from '../config/oauth.config';
 import { loginAPI, loginWithGoogle } from "../services/api.service";
 
 const LoginPage = () => {
     const navigate = useNavigate();
 
-    const handleLogin = (value) => {
-        // const res = await loginAPI(value.email, value.password);
-        // if(res.data) {
-        //     message.success("Đăng nhập thành công");
-        //     localStorage.setItem("access_token", res.data.access_token);
-        // }
+    const handleLogin = async (value) => {
+        try {
+            const res = await loginAPI(value.email, value.password);
+            if (res?.data?.access_token) {
+                localStorage.setItem("access_token", res.data.access_token);
+                message.success("Đăng nhập thành công");
+                navigate('/');
+            } else {
+                notification.error({
+                    message: "Đăng nhập thất bại",
+                    description: res?.message || 'Vui lòng kiểm tra lại email và mật khẩu'
+                })
+            }
+        } catch (error) {
+            notification.error({
+                message: "Đăng nhập thất bại",
+                description: 'Có lỗi khi kết nối. Vui lòng thử lại sau.'
+            })
+        }
     }
 
     const handleGoogleLoginSuccess = async (credentialResponse) => {
         try {
             const idToken = credentialResponse.credential;
 
-            // Gửi id_token và clientId lên backend để verify và tạo session
+            // Gửi id_token cho backend để verify và tạo session
             const response = await loginWithGoogle(idToken);
 
             // console.log('Backend response:', response.data);
@@ -30,7 +41,7 @@ const LoginPage = () => {
             localStorage.setItem('user', JSON.stringify(response.data.user));
             localStorage.setItem('access_token', response.data.access_token);
             
-            // message.success('Đăng nhập thành công!');
+            message.success('Đăng nhập thành công!');
             navigate('/');
         } catch (error) {
             message.error('Đăng nhập thất bại. Vui lòng thử lại!');

@@ -11,9 +11,10 @@ const loginAPI = (email, password) => {
     return axios.post(URL_BACKEND, data);
 }
 
-const registerUserAPI = (email, password) => {
+const registerUserAPI = (username, email, password) => {
     const URL_BACKEND = '/api/user/register';
     const data = {
+        username: username,
         email: email,
         password: password
     }
